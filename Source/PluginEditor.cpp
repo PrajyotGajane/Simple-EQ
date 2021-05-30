@@ -10,8 +10,15 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor(SimpleEQAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    peakFreqSliderAttachments(audioProcessor.apvts, "Peak Freq", peakFreqSlider),
+    peakGainSliderAttachments(audioProcessor.apvts, "Peak Gain", peakGainSlider),
+    peakQualitySliderAttachments(audioProcessor.apvts, "Peak Quality", peakQualitySlider),
+    lowCutFreqSliderAttachments(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
+    highCutFreqSliderAttachments(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
+    lowCutSlopeSliderAttachments(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
+    highCutSlopeSliderAttachments(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
