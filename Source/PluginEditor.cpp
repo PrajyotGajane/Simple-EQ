@@ -176,6 +176,8 @@ ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) : audi
         param->addListener(this);
     }
 
+    updateChain();
+
     startTimer(60);
 }
 
@@ -199,19 +201,24 @@ void ResponseCurveComponent ::timerCallback()
 {
     if (parameterChanged.compareAndSetBool(false, true))
     {
-        auto chainSettings = getChainSettings(audioProcessor.apvts);
-        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-
-        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
-        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
-
-        updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, (Slope)chainSettings.lowCutSlope);
-        updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, (Slope)chainSettings.highCutSlope);
-
+        updateChain();
 
         repaint();
     }
+}
+
+void ResponseCurveComponent::updateChain()
+{
+    auto chainSettings = getChainSettings(audioProcessor.apvts);
+    auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+    updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+    auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+    auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+
+    updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, (Slope)chainSettings.lowCutSlope);
+    updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, (Slope)chainSettings.highCutSlope);
+
 }
 
 void ResponseCurveComponent::paint(juce::Graphics& g)
@@ -311,6 +318,26 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor(SimpleEQAudioProcesso
     // editor's size to whatever you need it to be.
     peakFreqSlider.labels.add({ 0.f, "20Hz" });
     peakFreqSlider.labels.add({ 1.f, "20kHz" });
+
+    peakGainSlider.labels.add({ 0.f, "-24db" });
+    peakGainSlider.labels.add({ 1.f, "+24db" });
+
+    peakQualitySlider.labels.add({ 0.f, "0.1" });
+    peakQualitySlider.labels.add({ 1.f, "10.0" });
+
+    lowCutFreqSlider.labels.add({ 0.f, "20Hz" });
+    lowCutFreqSlider.labels.add({ 1.f, "20kHz" });
+
+    highCutFreqSlider.labels.add({ 0.0f, "20Hz" });
+    highCutFreqSlider.labels.add({ 1.0f, "20kHz" });
+
+    lowCutSlopeSlider.labels.add({ 0.0f, "12" });
+    lowCutSlopeSlider.labels.add({ 1.0f, "48" });
+
+    highCutSlopeSlider.labels.add({ 0.0f, "12" });
+    highCutSlopeSlider.labels.add({ 1.0f, "48" });
+
+
     for (auto* comp : getComps())
     {
         addAndMakeVisible(comp);
